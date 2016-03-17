@@ -88,7 +88,7 @@ class Stab:
                     else:
                         self.error_messages(1)
                 except e:
-                    print e
+                    logging.debug(e)
             else:
                 self.error_messages(1)
 
@@ -120,6 +120,7 @@ class Stab:
 
 
     def main(self):
+        #may add more functions later
         if self.options.printhead or self.options.col:
             self.read_lines()
 
