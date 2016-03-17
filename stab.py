@@ -112,6 +112,8 @@ class Stab:
             self.get_headers(reader.fieldnames)
             self.get_searches()
 
+
+            print '\t'.join([col for col in self.headers])
             for idx,row in enumerate(reader, 1):
                 self.search_lines(row, idx)
 
