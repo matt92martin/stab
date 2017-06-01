@@ -1,6 +1,6 @@
 Stab
 ----
-###### S(earch) Tab(delimited)
+###### (S)earch (Tab)delimited
 
 #### Usage:
 **Single Column**  
@@ -9,7 +9,7 @@ Search Column1 for Value1
 stab -c"Column1:Value1" File.txt
 
 
-**Multiple Columns**  
+**Multiple Columns**
 Search Column1 for Value1 and Column2 for Value2.
 
 **And Statement:**  
