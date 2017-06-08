@@ -105,10 +105,10 @@ class Stab:
         reader = self.reader
         searches = self.searches
 
-        print '\t'.join( [ x for x in self.headers ])
+        yield '\t'.join( [ x for x in self.headers ])
         for line in reader:
             if self.check_line( line, searches):
-                print '\t'.join( [ line[ x ] for x in self.headers ])
+                yield '\t'.join( [ line[ x ] for x in self.headers ])
 
 
     def main( self ):
@@ -122,9 +122,8 @@ class Stab:
 
         elif col:
             self.get_searches(col)
-            self.find_and_print()
-
-
+            for line in self.find_and_print():
+                print line
 
 
 def options( ):
