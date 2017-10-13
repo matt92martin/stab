@@ -1,5 +1,5 @@
 #!/usr/bin/python
-import sys, os, traceback, argparse, textwrap
+import sys, os, traceback, argparse, textwrap, re
 from csv import DictReader
 
 
@@ -20,38 +20,42 @@ class Stab:
         self.searches = None
 
 
-    def case( self, text, ignore ):
-        if ignore:
+    def case( self, text ):
+        if self.options.ignorecase:
             if type( text ) == list:
                 return [ x.lower() for x in text ]
             return text.lower()
         return text
 
 
+
     def get_searches(self, cols):
+
         searches = []
+        word_search = re.compile(r'(?P<header>[\s\w\<\>\\\,\.\!\@\#\$\%\^\&\*\(\)]+?):(?P<value>[\s\w\<\>\\\,\.\!\@\#\$\%\^\&\*\(\)]+)(?::?(?P<operator>!=|==|\^|\$))?(?:\|\|)?')
 
-        for col in cols:
+        for query in cols:
             search = {}
-            col = col[ 0 ].split(',')
 
-            try:
+            search_groups = [ match.groupdict() for match in word_search.finditer( query[0] ) ]
 
-                for c in col:
-                    key,value = c.split(':')
+            for group in search_groups:
+                # print group
+                if not group['operator']:
+                    group[ 'operator' ] = '=='
 
-                    if search.get( key , None):
-                        search[ key ].append( value )
-                    else:
-                        search[ key ] = [ value ]
+                header   = group['header']
+                value    = group['value']
+                operator = group['operator']
 
-                searches.append( search )
+                if search.get( header , None):
+                    search[ header ].append( ( value, operator ) )
+                else:
+                    search[ header ] = [ ( value, operator ) ]
 
-            except Exception, e:
-                self.exit("{} - Looks like something is wrong with your query".format(col))
+            searches.append( search )
 
-        self.searches = searches
-        return
+        return searches
 
 
     def headers( self ):
@@ -82,14 +86,16 @@ class Stab:
 
 
     def check_line( self, line, searches ):
-        ignore = self.options.ignorecase
-        check = False
 
+        check = False
         for search in searches:
 
             for s in search.items():
+                # print s
                 col = s[ 0 ]
-                if line.get( col, False ) and self.case( line[ col ], ignore ) in self.case( s[ 1 ], ignore ):
+                line_col = line.get( col, False )
+
+                if line_col and self.case( line_col ) in self.case( s[ 1 ] ):
                     check = True
                 else:
                     check = False
@@ -103,25 +109,27 @@ class Stab:
 
     def find_and_print( self ):
         reader = self.reader
-        searches = self.searches
 
         yield '\t'.join( [ x for x in self.headers ])
         for line in reader:
-            if self.check_line( line, searches):
+            if self.check_line( line, self.searches):
                 yield '\t'.join( [ line[ x ] for x in self.headers ])
 
 
     def main( self ):
-        col = self.options.col
 
         if self.options.printhead:
+
             for i,head in enumerate( self.headers, 0 ):
                 print "{}) {}".format( i, head )
 
             self.exit( 0 )
 
-        elif col:
-            self.get_searches(col)
+        else:
+
+            self.searches = self.get_searches(self.options.col or [])
+
+            print self.searches
             for line in self.find_and_print():
                 print line
 
@@ -132,7 +140,7 @@ def options( ):
         (S)earch (Tab)-Delimited Files
         Examples:
            stab -c"Column:Value" File
-           stab -c"Column1:Value1,Column2:Value2" File
+           stab -c"Column1:Value1||Column2:Value2" File
            stab -c"Column1:Value1" -c"Column2:Value2" File
         """ ),
         add_help=False,
