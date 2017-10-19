@@ -19,6 +19,7 @@ class Stab:
         self.headers = self.headers()
         self.searches = None
 
+
     def format_text(self, text):
         if self.options.ignorecase: text = self.case( text )
         if self.options.trim:       text = self.trim( text )
