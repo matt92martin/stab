@@ -181,7 +181,7 @@ def options( ):
            stab -c"Column:Value" File
            stab -c"Column1:Value1||Column2:Value2" File
            stab -c"Column1:Value1" -c"Column2:Value2" File
-           stab -c"Column1:Value1:!=" -c"Column2:Value2:==" File
+           stab -c"Column1:Value1:!=" -c"Column2:Value2:$" File
            stab -c"Column1:Value1:^" -c"Column2:Value2:$" File
         """ ),
         add_help=False,
