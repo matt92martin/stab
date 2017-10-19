@@ -153,7 +153,8 @@ class Stab:
     def find_and_print( self ):
         reader = self.reader
 
-        yield '\t'.join( [ x for x in self.headers ])
+        if self.options.headers:
+            yield '\t'.join( [ x for x in self.headers ])
         for line in reader:
             if self.check_line( line, self.searches):
                 yield '\t'.join( [ line[ x ] for x in self.headers ])
@@ -195,6 +196,7 @@ def options( ):
     parser.add_argument( '-s',  '--show-all', help='Print headers', dest='printhead', action='store_true' )
     parser.add_argument( '-i',  '--ignore-case', help='Ignore case', dest='ignorecase', action='store_true' )
     parser.add_argument( '-t',  '--trim', help='Strip spaces from column values', dest='trim', action='store_true' )
+    parser.add_argument( '--nh', help='Print without headers', dest='headers', action='store_false' )
 
     parser.add_argument( '--help', help=argparse.SUPPRESS, action='help' )
     parser.add_argument( 'file', help='File to parse', type=str )
