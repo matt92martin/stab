@@ -1,40 +1,62 @@
-Stab
-----
+# Stab
+
 ###### (S)earch (Tab)delimited
+
+<br/>
 
 #### Usage:
 
-**Single Column (*Search Column1 for Value1*):**
+<br/>
 
-    stab -c"Column1:Value1" File.txt
+Single Column (*Search Column1 for Value1*):
 
-**Multiple Columns (*Search Column1 for Value1 and Column2 for Value2.*):**
+```bash
+stab -c"Column1:Value1" File.txt
+```
 
-***And Statement:***
+Multiple Columns (*Search Column1 for Value1 and Column2 for Value2.*):
 
-    stab -c"Column1,Column2||Value1,Value2" File.txt
+*And Statement:*
 
-***Or Statement:***
+```bash
+stab -c"Column1,Column2||Value1,Value2" File.txt
+```
 
-    stab -c"Column1:Value1" -c"Column2:Value2" File.txt
+*Or Statement:*
 
-**Operators:**
+```bash
+stab -c"Column1:Value1" -c"Column2:Value2" File.txt
+```
 
-***Equal (default):***
+<br/><br/>
 
-    stab -c"Column1:Value1" -c"Column2:Value2:==" File.txt
+*Operators:*
 
-***Not Equal:***
+*Equal (default):*
 
-    stab -c"Column2:Value2:!=" File.txt
+```bash
+stab -c"Column1:Value1" -c"Column2:Value2:==" File.txt
+```
 
-***Starts With:***
+*Not Equal:*
 
-    stab -c"Column2:Value2:^" File.txt
+```bash
+stab -c"Column2:Value2:!=" File.txt
+```
 
-***Ends With:***
+*Starts With:*
 
-    stab -c"Column2:Value2:$" File.txt
+```bash
+stab -c"Column2:Value2:^" File.txt
+```
+
+*Ends With:*
+
+```bash
+stab -c"Column2:Value2:$" File.txt
+```
+
+<br/><br/>
 
 #### Todos:
 - [x] Print all lines
