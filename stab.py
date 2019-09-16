@@ -9,65 +9,60 @@ from csv import DictReader
 #  `-...................____|_/              )_/ ____
 
 
-
 class Stab:
 
-    def __init__( self, options ):
+    def __init__(self, options):
 
         self.options = options
-        self.reader  = self.csv()
+        self.reader = self.csv()
         self.headers = self.headers()
         self.searches = None
 
-
     def format_text(self, text):
-        if self.options.ignorecase: text = self.case( text )
-        if self.options.trim:       text = self.trim( text )
+        if self.options.ignorecase: text = self.case(text)
+        if self.options.trim:       text = self.trim(text)
         return text
 
-
-    def case( self, text ):
-        if type( text ) == list:
-            return [ (x.lower(), op) for x, op in text ]
+    def case(self, text):
+        if type(text) == list:
+            return [(x.lower(), op) for x, op in text]
         return text.lower()
 
-
-    def trim( self, text ):
-        if type( text ) == list:
-            return [ (x.strip(), op) for x, op in text ]
+    def trim(self, text):
+        if type(text) == list:
+            return [(x.strip(), op) for x, op in text]
         return text.strip()
-
 
     def get_searches(self, cols):
 
         searches = []
-        word_search = re.compile(r'(?P<header>[\s\w\<\>\\\,\.\!\@\#\$\%\^\&\*\(\)]+):(?P<value>[\s\w\<\>\\\,\.\!\@\#\$\%\^\&\*\(\)]+)(?::?(?P<operator>!=|==|\^|\$))?(?:\|\|)?')
+        # Does it need to be complex?
+        word_search = re.compile(r'(?P<header>[\s\w\<\>\\\,\.\!\@\#\$\%\^\&\*\(\)]+):(?P<value>([\s\w\<\>\\\,\.\!\@\#\$\%\^\&\*\(\)]+)||(\s*))(?::?(?P<operator>!=|==|\^|\$))?(?:\|\|)?')
 
         for query in cols:
             search = {}
 
-            search_groups = [ match.groupdict() for match in word_search.finditer( query[0] ) ]
+            search_groups = [match.groupdict() for match in word_search.finditer(query[0])]
 
             for group in search_groups:
 
                 if not group['operator']:
-                    group[ 'operator' ] = '=='
+                    group['operator'] = '=='
 
-                header   = group['header']
-                value    = group['value']
+                header = group['header']
+                value = group['value']
                 operator = group['operator']
 
-                if search.get( header , None):
-                    search[ header ].append( ( value, operator ) )
+                if search.get(header, None):
+                    search[header].append((value, operator))
                 else:
-                    search[ header ] = [ ( value, operator ) ]
+                    search[header] = [(value, operator)]
 
-            searches.append( search )
+            searches.append(search)
 
         return searches
 
-
-    def headers( self ):
+    def headers(self):
 
         gcol = self.options.goodcol
         bcol = self.options.badcol
@@ -75,30 +70,31 @@ class Stab:
 
         if gcol and gcol.strip():
 
-            cols = [ x.strip() for x in gcol.split(',') ]
-            return [ x for x in fieldnames if x in cols ]
+            cols = [x.strip() for x in gcol.split(',')]
+            return [x for x in fieldnames if x in cols]
 
         elif bcol and bcol.strip():
 
-            cols = [ x.strip() for x in bcol.split(',') ]
-            return [ x for x in fieldnames if x not in cols ]
+            cols = [x.strip() for x in bcol.split(',')]
+            return [x for x in fieldnames if x not in cols]
 
         return fieldnames
 
+    def csv(self):
+        return DictReader(open(self.options.file), delimiter=self.options.delim)
 
-    def csv( self ):
-        return DictReader( open( self.options.file ), delimiter=self.options.delim )
-
-
-    def exit( self, mes ):
-        sys.exit( mes )
+    def exit(self, mes):
+        sys.exit(mes)
 
     def exec_equal(self, value, search):
         return search == value
+
     def exec_notequal(self, value, search):
         return search != value
+
     def exec_startswith(self, value, search):
         return value.startswith(search)
+
     def exec_endswith(self, value, search):
         return value.endswith(search)
 
@@ -127,18 +123,18 @@ class Stab:
 
         return check
 
-    def check_line( self, line, searches ):
+    def check_line(self, line, searches):
         # Print line if no searches are specified
         if len(searches) == 0:
             return True
 
         for search in searches:
             check = False
-            for columnName,searchValues in search.items():
+            for columnName, searchValues in search.items():
 
                 check = self.exec_search_set(
-                    self.format_text( line.get( columnName, False ) ),
-                    self.format_text( searchValues )
+                    self.format_text(line.get(columnName, False)),
+                    self.format_text(searchValues)
                 )
 
                 if not check:
@@ -149,23 +145,21 @@ class Stab:
 
         return False
 
-
-    def find_and_print( self ):
+    def find_and_print(self):
         reader = self.reader
 
         if self.options.headers:
-            yield '\t'.join( [ x for x in self.headers ])
+            yield '\t'.join([x for x in self.headers])
         for line in reader:
-            if self.check_line( line, self.searches):
-                yield '\t'.join( [ line[ x ] for x in self.headers ])
+            if self.check_line(line, self.searches):
+                yield '\t'.join([line[x] for x in self.headers])
 
-
-    def main( self ):
+    def main(self):
 
         if self.options.printhead:
 
-            for i,head in enumerate( self.headers, 0 ):
-                print "{}) {}".format( i, head )
+            for i, head in enumerate(self.headers, 0):
+                print "{}) {}".format(i, head)
 
         else:
 
@@ -175,9 +169,9 @@ class Stab:
                 print line
 
 
-def options( ):
+def options():
     parser = argparse.ArgumentParser(
-        description=textwrap.dedent( """
+        description=textwrap.dedent("""
         (S)earch (Tab)-Delimited Files
         Examples:
            stab -c"Column:Value" File
@@ -185,30 +179,31 @@ def options( ):
            stab -c"Column1:Value1" -c"Column2:Value2" File
            stab -c"Column1:Value1:!=" -c"Column2:Value2:$" File
            stab -c"Column1:Value1:^" -c"Column2:Value2:$" File
-        """ ),
+        """),
         add_help=False,
         formatter_class=argparse.RawDescriptionHelpFormatter
     )
-    parser.add_argument( '-c',  '--column', help='Column(s) and value(s) for searching', dest='col', type=str, nargs='*', action='append')
-    parser.add_argument( '-h',  '--headers', help='Column(s) to include during print', dest='goodcol', type=str )
-    parser.add_argument( '-^h', '--^headers', help='Column(s) to supress during print', dest='badcol', type=str )
-    parser.add_argument( '-d',  '--delimiter', help='Field delimiter', dest='delim', type=str, default="\t" )
-    parser.add_argument( '-s',  '--show-all', help='Print headers', dest='printhead', action='store_true' )
-    parser.add_argument( '-i',  '--ignore-case', help='Ignore case', dest='ignorecase', action='store_true' )
-    parser.add_argument( '-t',  '--trim', help='Strip spaces from column values', dest='trim', action='store_true' )
-    parser.add_argument( '--nh', help='Print without headers', dest='headers', action='store_false' )
+    parser.add_argument('-c', '--column', help='Column(s) and value(s) for searching', dest='col', type=str, nargs='*',
+                        action='append')
+    parser.add_argument('-h', '--headers', help='Column(s) to include during print', dest='goodcol', type=str)
+    parser.add_argument('-^h', '--^headers', help='Column(s) to supress during print', dest='badcol', type=str)
+    parser.add_argument('-d', '--delimiter', help='Field delimiter', dest='delim', type=str, default="\t")
+    parser.add_argument('-s', '--show-all', help='Print headers', dest='printhead', action='store_true')
+    parser.add_argument('-i', '--ignore-case', help='Ignore case', dest='ignorecase', action='store_true')
+    parser.add_argument('-t', '--trim', help='Strip spaces from column values', dest='trim', action='store_true')
+    parser.add_argument('--nh', help='Print without headers', dest='headers', action='store_false')
 
-    parser.add_argument( '--help', help=argparse.SUPPRESS, action='help' )
-    parser.add_argument( 'file', help='File to parse', type=str )
+    parser.add_argument('--help', help=argparse.SUPPRESS, action='help')
+    parser.add_argument('file', help='File to parse', type=str)
 
-    return parser.parse_args( )
+    return parser.parse_args()
 
 
 if __name__ == '__main__':
     try:
-        stab = Stab( options() )
+        stab = Stab(options())
         stab.main()
-        sys.exit( 0 )
+        sys.exit(0)
     except KeyboardInterrupt, e:  # Ctrl-C
         raise e
     except SystemExit, e:  # sys.exit()
@@ -218,6 +213,6 @@ if __name__ == '__main__':
         pass
     except Exception, e:
         print 'ERROR, UNEXPECTED EXCEPTION'
-        print str( e )
+        print str(e)
         traceback.print_exc()
-        os._exit( 1 )
+        os._exit(1)
